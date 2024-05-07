@@ -1,5 +1,6 @@
 package mate.academy.rickandmorty.service.impl;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -12,14 +13,17 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CharacterServiceImpl implements CharacterService {
-    private static final int CHARACTERS_AMOUNT = 826;
     private final CharacterRepository characterRepository;
+    private Random random = new Random();
 
     @Override
+    @Transactional
     public Character generateRandomCharacter() {
-        return Optional.of(characterRepository.findById(new Random().nextLong(CHARACTERS_AMOUNT)))
+        long charactersAmount = characterRepository.count();
+        long id = random.nextLong(charactersAmount);
+        return Optional.of(characterRepository.findById(id))
                 .get()
-                .get();
+                .orElseThrow(() -> new IllegalStateException("Character not found with id: " + id));
     }
 
     @Override

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Rick and Morty character management",
         description = "Endpoints for managing characters")
 @RestController
-@RequestMapping("characters")
+@RequestMapping("/characters")
 @RequiredArgsConstructor
 public class CharacterController {
     private final CharacterService characterService;
@@ -22,7 +22,7 @@ public class CharacterController {
     @Operation(summary = "Get one character",
             description = "Get random character from Rick and Morty universe")
     @GetMapping
-    public Character generate() {
+    public Character getRandomCharacter() {
         return characterService.generateRandomCharacter();
     }
 
@@ -33,5 +33,4 @@ public class CharacterController {
     public List<Character> findCharacterNameContains(@RequestParam String row) {
         return characterService.findCharacterNameContains(row);
     }
-
 }

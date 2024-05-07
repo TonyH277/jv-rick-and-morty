@@ -1,21 +1,19 @@
-package mate.academy.rickandmorty.config;
+package mate.academy.rickandmorty.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.rickandmorty.model.Character;
 import mate.academy.rickandmorty.repository.CharacterRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
 public class DataFetcher {
-
-    private static final String CHARACTER_URL = "https://rickandmortyapi.com/api/character";
     private static final String ROOT_INFO = "info";
     private static final String ROOT_RESULTS = "results";
     private static final String ROOT_NEXT = "next";
@@ -23,18 +21,22 @@ public class DataFetcher {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final CharacterRepository characterRepository;
+    @Value("${characters.url}")
+    private String characterUrl;
 
-    @PostConstruct
-    public void fetchData() throws JsonProcessingException {
-        String url = CHARACTER_URL;
+    public void populateCharactersDB() {
+        String url = characterUrl;
 
         while (url != null) {
             String jsonResponse = restTemplate.getForObject(url, String.class);
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-
-            List<Character> pageCharacters = deserializeCharacters(rootNode);
-            characterRepository.saveAll(pageCharacters);
-            url = getNextPageUrl(rootNode);
+            try {
+                JsonNode rootNode = objectMapper.readTree(jsonResponse);
+                List<Character> pageCharacters = deserializeCharacters(rootNode);
+                characterRepository.saveAll(pageCharacters);
+                url = getNextPageUrl(rootNode);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Can't fetch all characters");
+            }
         }
     }
 
@@ -57,4 +59,3 @@ public class DataFetcher {
 
     }
 }
-
