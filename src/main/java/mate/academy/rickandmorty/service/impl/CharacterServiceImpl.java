@@ -2,7 +2,6 @@ package mate.academy.rickandmorty.service.impl;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import mate.academy.rickandmorty.model.Character;
@@ -21,8 +20,7 @@ public class CharacterServiceImpl implements CharacterService {
     public Character generateRandomCharacter() {
         long charactersAmount = characterRepository.count();
         long id = random.nextLong(charactersAmount);
-        return Optional.of(characterRepository.findById(id))
-                .get()
+        return characterRepository.findById(id)
                 .orElseThrow(() -> new IllegalStateException("Character not found with id: " + id));
     }
 
